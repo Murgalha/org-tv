@@ -21,37 +21,48 @@
 
 (defun org-tv-write-series (name id seasons-list)
   (dolist (season seasons-list)
-	(let* ((full-url (org-tv-get-query-url
-					  (org-tv-get-season-url id season)
-					  (list (cons "api_key" (getenv "TMDB_API_KEY")))))
-		   (season-data (org-tv-retrieve-json full-url)))
-	  (org-tv-write-season name season-data)))
+	  (let* ((full-url (org-tv-get-query-url
+					            (org-tv-get-season-url id season)
+					            (list (cons "api_key" (getenv "TMDB_API_KEY")))))
+		       (season-data (org-tv-retrieve-json full-url)))
+	    (org-tv-write-season name season-data)))
   (message "%s added!" name))
 
 
-(defun org-tv-get-seasons-list (input)
-  (let* ((tokens (split-string input "-"))
+(defun org-tv-get-seasons-list (series-data)
+  (let* ((input
+          (ivy-read (format "Choose seasons (%s available): "
+					                  (assoc-default "number_of_seasons" series-data))
+                    '()))
+         (tokens (split-string input "-"))
 		 (first (string-to-number (car tokens)))
 		 (last (string-to-number (car (last tokens)))))
 	(number-sequence first last)))
 
 
-(defun org-tv-choose-seasons (series-data)
-  (print series-data)
-  (org-tv-get-seasons-list
-   (ivy-read (format "Choose seasons (%s available): "
-					 (assoc-default "number_of_seasons" series-data))
-			 '())))
+(defun org-tv-set-series-display-name (choice item-list)
+  (mapcar (lambda (x)
+            (let* ((title (assoc-default "original_name" x))
+                   (id (assoc-default "id" x))
+                   (date (assoc-default "first_air_date" x))
+                   (year (if (= (length date) 0)
+                             "unknown" (substring date 0 4)))
+					         (string (format "%s (%s) - ID:%s" title year id)))
+              (append x (list (cons "display_name" string)))))
+          item-list))
+
 
 (defun org-tv-add-series ()
   (interactive)
-  (let* ((data (org-tv-choose-item
-				"series"
-				(assoc-default "results" (org-tv-search "series"))))
-		 (name (car data))
-		 (id (car (reverse data))))
-	(print data)
-	(print name)
-	(print id)
-	(org-tv-write-series name id (org-tv-choose-seasons
-							 (org-tv-get-from-id "series" id)))))
+  (let* ((choice "series")
+         (results (assoc-default "results" (org-tv-search choice)))
+         (series-summary
+          (org-tv-choose-item
+           choice (org-tv-set-series-display-name choice results)
+           "display_name"))
+         (seasons
+               (org-tv-get-seasons-list
+                (org-tv-get-from-id choice (assoc-default "id" series-summary))))
+         (name (assoc-default "name" series-summary))
+         (id (assoc-default "id" series-summary)))
+    (org-tv-write-series name id seasons)))

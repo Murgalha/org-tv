@@ -38,18 +38,21 @@ CHOICE must be either 'movie' or 'series'"
 								 (cons "query" search-string))))))
 
 
-(defun org-tv-choose-item (choice itemlist)
-  (let ((choices
-		 (mapcar (lambda (x)
-				   (let* ((title-key (if (string= choice "movie")
-										 "original_title"
-									   "original_name"))
-						  (title (assoc-default title-key x))
-              (id (assoc-default "id" x)))
-					 (format "%s - %s" title id)))
-				 itemlist)))
-	(let ((choice (ivy-read "Choose: " choices)))
-	  (split-string choice " - "))))
+(defun org-tv-get-element-from-list (list field-to-compare search-string)
+  "Compare SEARCH-STRING with each FIELD-TO-COMPARE element from each
+list item."
+  (when list '() list)
+  (if (string= (assoc-default field-to-compare (car list)) search-string)
+      (car list)
+    (org-tv-get-element (cdr list) field-to-compare search-string)))
+
+
+(defun org-tv-choose-item (choice item-list field-to-display)
+  (let* ((choices
+          (mapcar (lambda (x) (assoc-default field-to-display x)) item-list))
+         (selection (ivy-read "Choose: " choices)))
+    (org-tv-get-element-from-list item-list field-to-display selection)))
+
 
 ;; TODO show error message if TMDB_API_KEY is empty
 (defun org-tv-get-from-id (choice id)
