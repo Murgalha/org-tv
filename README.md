@@ -14,3 +14,9 @@ Movies are added to `~/org/movies.org` as a checklist item inside the gender hea
 
 ### Series
 Series are added to `~/org/series/<series-name>.org`. Each series has its own file, containing a header for each season and a checklist item for each episode.
+
+## Screenshots
+
+![Movie list example](assets/movies.png)
+
+![Series example](assets/series.png)
