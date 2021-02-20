@@ -66,3 +66,15 @@
          (name (assoc-default "name" series-summary))
          (id (assoc-default "id" series-summary)))
     (org-tv-write-series name id seasons)))
+
+;; TODO: Create finished directory if it does not exist
+;; TODO: Make a nicer selection of series (without extensions?)
+(defun org-tv-move-finished-series ()
+  "Move the chosen series to the 'finished' dir."
+  (interactive)
+  (let* ((base-dir "~/org/series/")
+        (series (directory-files base-dir nil "\\.org$"))
+        (basename (ivy-read "Select finished series: " series)))
+    (rename-file (concat (file-name-as-directory base-dir) basename)
+                 (concat (file-name-as-directory base-dir)
+                         (file-name-as-directory "finished")))))
