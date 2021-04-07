@@ -33,7 +33,7 @@
 
 (defun org-tv-get-seasons-list (series-data)
   (let* ((input
-          (ivy-read (format "Choose seasons (%s available): "
+          (completing-read (format "Choose seasons (%s available): "
 					                  (assoc-default "number_of_seasons" series-data))
                     '()))
          (tokens (split-string input "-"))
@@ -76,7 +76,7 @@
   (interactive)
   (let* ((base-dir "~/org/series/")
         (series (directory-files base-dir nil "\\.org$"))
-        (basename (ivy-read "Select finished series: " series)))
+        (basename (completing-read "Select finished series: " series)))
     (rename-file (concat (file-name-as-directory base-dir) basename)
                  (concat (file-name-as-directory base-dir)
                          (file-name-as-directory "finished")))))

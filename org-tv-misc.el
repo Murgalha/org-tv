@@ -52,7 +52,7 @@ list item."
 (defun org-tv-choose-item (choice item-list field-to-display)
   (let* ((choices
           (mapcar (lambda (x) (assoc-default field-to-display x)) item-list))
-         (selection (ivy-read "Choose: " choices)))
+         (selection (completing-read "Choose: " choices)))
     (org-tv-get-element-from-list item-list field-to-display selection)))
 
 
