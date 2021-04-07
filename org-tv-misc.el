@@ -30,6 +30,8 @@ a list of dotted pairs (key . value)."
 (defun org-tv-search (choice)
   "Prompt to enter the name of the choice to search on IMDb.
 CHOICE must be either 'movie' or 'series'"
+  (when (not (getenv "TMDB_API_KEY"))
+    (error "%s" "Error: TMDB_API_KEY is not set"))
   (let* ((search-string
 		  (read-string (format "%s to search: " (capitalize choice)))))
 	(org-tv-retrieve-json
@@ -54,9 +56,10 @@ list item."
     (org-tv-get-element-from-list item-list field-to-display selection)))
 
 
-;; TODO show error message if TMDB_API_KEY is empty
 (defun org-tv-get-from-id (choice id)
   "Fetch data from movie or series from given ID."
+  (when (not (getenv "TMDB_API_KEY"))
+    (error "%s" "Error: TMDB_API_KEY is not set"))
   (let* ((query-url (org-tv-get-query-url
 					 (org-tv-get-id-url choice id)
 					 (list (cons "api_key" (getenv "TMDB_API_KEY"))))))

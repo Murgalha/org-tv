@@ -20,6 +20,8 @@
 
 
 (defun org-tv-write-series (name id seasons-list)
+  (when (not (getenv "TMDB_API_KEY"))
+    (error "%s" "Error: TMDB_API_KEY is not set"))
   (dolist (season seasons-list)
 	  (let* ((full-url (org-tv-get-query-url
 					            (org-tv-get-season-url id season)
