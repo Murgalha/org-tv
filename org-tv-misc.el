@@ -1,3 +1,5 @@
+(require 'cl-lib)
+
 (defun org-tv-retrieve-json (url)
   "Make a GET request on given url and parse the JSON result."
   (parse-json-from-string
@@ -20,7 +22,7 @@
   "Concatenates BASE-URL with key/values on given QUERY-LIST,
 a list of dotted pairs (key . value)."
   (let* ((full-url (concat base-url "?")))
-	(loop for pair in query-list do
+	(cl-loop for pair in query-list do
 		  (let* ((key (car pair))
 				 (value (replace-regexp-in-string " " "+" (cdr pair))))
 			(setq full-url (format "%s%s=%s&" full-url key value))))
