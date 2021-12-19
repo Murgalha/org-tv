@@ -2,31 +2,33 @@
 
 (defun org-tv-retrieve-json (url)
   "Make a GET request on given url and parse the JSON result."
+  (when (not (executable-find "curl"))
+    (error "%s" "Error: 'curl' not found on PATH. Please make sure it is installed"))
   (parse-json-from-string
    (shell-command-to-string (format "curl -s '%s'" url))))
 
 
 (defun org-tv-get-id-url (choice id)
   (if (string= choice "movie")
-	  (format "https://api.themoviedb.org/3/%s/%s" choice id)
-	(format "https://api.themoviedb.org/3/tv/%s" id)))
+	    (format "https://api.themoviedb.org/3/%s/%s" choice id)
+	  (format "https://api.themoviedb.org/3/tv/%s" id)))
 
 
 (defun org-tv-get-search-url (choice)
   (if (string= choice "movie")
-	  "https://api.themoviedb.org/3/search/movie"
-	"https://api.themoviedb.org/3/search/tv"))
+	    "https://api.themoviedb.org/3/search/movie"
+	  "https://api.themoviedb.org/3/search/tv"))
 
 
 (defun org-tv-get-query-url (base-url query-list)
   "Concatenates BASE-URL with key/values on given QUERY-LIST,
 a list of dotted pairs (key . value)."
   (let* ((full-url (concat base-url "?")))
-	(cl-loop for pair in query-list do
-		  (let* ((key (car pair))
-				 (value (replace-regexp-in-string " " "+" (cdr pair))))
-			(setq full-url (format "%s%s=%s&" full-url key value))))
-	(substring full-url 0 -1)))
+	  (cl-loop for pair in query-list do
+		         (let* ((key (car pair))
+				            (value (replace-regexp-in-string " " "+" (cdr pair))))
+			         (setq full-url (format "%s%s=%s&" full-url key value))))
+	  (substring full-url 0 -1)))
 
 
 (defun org-tv-search (choice)
@@ -35,11 +37,11 @@ CHOICE must be either 'movie' or 'series'"
   (when (not (getenv "TMDB_API_KEY"))
     (error "%s" "Error: TMDB_API_KEY is not set"))
   (let* ((search-string
-		  (read-string (format "%s to search: " (capitalize choice)))))
-	(org-tv-retrieve-json
-	 (org-tv-get-query-url (org-tv-get-search-url choice)
-						   (list (cons "api_key" (getenv "TMDB_API_KEY"))
-								 (cons "query" search-string))))))
+		      (read-string (format "%s to search: " (capitalize choice)))))
+	  (org-tv-retrieve-json
+	   (org-tv-get-query-url (org-tv-get-search-url choice)
+						               (list (cons "api_key" (getenv "TMDB_API_KEY"))
+								                 (cons "query" search-string))))))
 
 
 (defun org-tv-get-element-from-list (list field-to-compare search-string)
@@ -48,7 +50,7 @@ list item."
   (when list '() list)
   (if (string= (assoc-default field-to-compare (car list)) search-string)
       (car list)
-    (org-tv-get-element (cdr list) field-to-compare search-string)))
+    (org-tv-get-element-from-list (cdr list) field-to-compare search-string)))
 
 
 (defun org-tv-choose-item (choice item-list field-to-display)
@@ -63,6 +65,6 @@ list item."
   (when (not (getenv "TMDB_API_KEY"))
     (error "%s" "Error: TMDB_API_KEY is not set"))
   (let* ((query-url (org-tv-get-query-url
-					 (org-tv-get-id-url choice id)
-					 (list (cons "api_key" (getenv "TMDB_API_KEY"))))))
-	(org-tv-retrieve-json query-url)))
+					           (org-tv-get-id-url choice id)
+					           (list (cons "api_key" (getenv "TMDB_API_KEY"))))))
+	  (org-tv-retrieve-json query-url)))
